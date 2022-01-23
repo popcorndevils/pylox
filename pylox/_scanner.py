@@ -52,6 +52,22 @@ class Scanner:
         _value = self._source[self._start + 1: self._current - 1]
         return _value
 
+    def _is_alpha(self, char) -> bool:
+        return char.lower() in Token.ALPHA
+
+    def _is_numeric(self, char) -> bool:
+        return char.lower() in Token.NUMERIC
+
+    def _is_alpha_numeric(self, char) -> bool:
+        return self._is_alpha(char) or self._is_numeric(char)
+
+    def _get_identifier(self):
+        while self._is_alpha_numeric(self._peek()):
+            self._advance()
+        _lexeme = self._source[self._start: self._current]
+        _type = Token.KEYWORDS.get(_lexeme, TokenType.IDENTIFIER)
+        return Token(_type, _lexeme)
+
     def _match(self, character, skip = 0):
         c = self._source[self._current + skip]
         if c == character:
@@ -73,5 +89,7 @@ class Scanner:
             return Token(TokenType.EQUAL, self._get_lexeme())
         elif c in Token.WHITE_SPACE:
             return None
+        elif self._is_alpha(c):
+            return self._get_identifier()
         else:
             return Token(TokenType.BANG, self._get_lexeme())

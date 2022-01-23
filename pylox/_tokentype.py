@@ -22,6 +22,7 @@ class TokenType(Enum):
     NIL = auto()
     # keywords
     VAR = auto()
+    CLASS = auto()
     # MISC
     ERROR = auto()
     EOF = auto()
