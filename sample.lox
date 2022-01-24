@@ -1,1 +1,2 @@
-var test = "hello world";
+var test_1 = "hello world";
+var test_2 = 123.224;

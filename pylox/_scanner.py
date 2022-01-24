@@ -50,7 +50,7 @@ class Scanner:
 
         self._advance()
         _value = self._source[self._start + 1: self._current - 1]
-        return _value
+        return Token(TokenType.STRING, self._get_lexeme(), _value)
 
     def _is_alpha(self, char) -> bool:
         return char.lower() in Token.ALPHA
@@ -62,11 +62,23 @@ class Scanner:
         return self._is_alpha(char) or self._is_numeric(char)
 
     def _get_identifier(self):
-        while self._is_alpha_numeric(self._peek()):
+        while self._is_alpha_numeric(self._peek()) or self._peek() == "_":
             self._advance()
         _lexeme = self._source[self._start: self._current]
         _type = Token.KEYWORDS.get(_lexeme, TokenType.IDENTIFIER)
         return Token(_type, _lexeme)
+
+    def _get_numeric(self):
+        _allow_decimal = True
+        c = self._peek()
+        while self._is_numeric(c) or (c == "." and _allow_decimal):
+            if c == ".":
+                _allow_decimal = False
+            self._advance()
+            c = self._peek()
+
+        _lexeme = self._source[self._start: self._current]
+        return Token(TokenType.NUMBER, _lexeme, float(_lexeme))
 
     def _match(self, character, skip = 0):
         c = self._source[self._current + skip]
@@ -78,9 +90,7 @@ class Scanner:
     def _get_next(self):
         c = self._advance()
         if c == "\"":
-            _value = self._get_string()
-            _lexeme = self._get_lexeme()
-            return Token(TokenType.STRING, _lexeme, _value)
+            return self._get_string()
         elif c == ";":
             return Token(TokenType.SEMICOLON, self._get_lexeme())
         elif c == "=":
@@ -89,7 +99,11 @@ class Scanner:
             return Token(TokenType.EQUAL, self._get_lexeme())
         elif c in Token.WHITE_SPACE:
             return None
+        elif c == "\n":
+            self._line += 1
         elif self._is_alpha(c):
             return self._get_identifier()
+        elif self._is_numeric(c):
+            return self._get_numeric()
         else:
             return Token(TokenType.BANG, self._get_lexeme())
